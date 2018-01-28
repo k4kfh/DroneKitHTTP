@@ -14,6 +14,8 @@ keys = {
 "sIegcsimlHCAc9PBXWRB":"2Aooe5DiLV5DXUPp9mMs"
 }
 
+# Example Validate Message: {"type":"validate", "key":"sIegcsimlHCAc9PBXWRB", "secret":"2Aooe5DiLV5DXUPp9mMs"}
+
 soloTMP = dronekit.connect("udpout:10.1.1.10:14560")
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
