@@ -65,8 +65,9 @@
       }
 
       this.socket.onmessage = function(msg) {
-        console.log("RX: " + (msg.data))
-
+        if (mainDroneObject.logAllMessages){
+          console.log("RX: " + (msg.data))
+        }
         var json = JSON.parse(msg.data);
         if (json.type == "validate"){
           mainDroneObject.validate.status = json.status;
@@ -75,6 +76,8 @@
         else if (json.type == "return"){
           mainDroneObject.vehicle.attributes = json.attributes
         }
+        //Now feed data to user-settable handler
+        mainDroneObject.messageHandler(msg)
       }
       this.validate = {
         status: false,
@@ -82,16 +85,23 @@
       this.vehicle = {
         attributes : undefined,
       };
+      this.logAllMessages = false;
+      this.messageHandler = function(e){}; //by default this does nothing
     }
 
+    //Setting up our specific drone
+    solo = new Drone("ws://localhost:8080/websocket", 250, "sIegcsimlHCAc9PBXWRB", "2Aooe5DiLV5DXUPp9mMs")
+    solo.messageHandler = function(msg){
+      json = JSON.parse(msg.data)
+      if (json.type == "return"){
+        //we got an attribute update!
+        document.getElementById("json-display").innerHTML = JSON.stringify(json.attributes, null, 2);
+      }
+    }
   </script>
 </head>
-<body onload="init();">
-  <form onsubmit="onSubmit(); return false;">
-    <input type="text" id="input">
-    <input type="submit" value="Send">
-    <button onclick="onCloseClick(); return false;">close</button>
-  </form>
-  <div id="log"></div>
+<body>
+  <pre id="json-display">
+  </pre>
 </body>
 </html>
