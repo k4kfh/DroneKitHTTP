@@ -5,8 +5,6 @@ import tornado.ioloop
 import json as json_lib
 import dronekit
 import sys
-import SetInterval as setInterval
-import hashlib
 
 all_clients = []
 validated_clients = []
@@ -123,7 +121,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         print("Closing WebSocket...")
         try:
             print("Canceling any listener(s) leftover...")
-            self.api.listener.cancel()
+            self.api.listener.stop()
         except AttributeError:
             print("No listener to cancel! Socket closing.")
         # Remove self from list of clients
@@ -189,7 +187,7 @@ class APIBackend:
                             if (json["listener"] == None):
                                 print("Canceling listener...")
                                 try:
-                                    self.listener.cancel()
+                                    self.listener.stop()
                                     self.listener = None
                                 except AttributeError:
                                     print("No listener to cancel! Ignoring...")
@@ -279,13 +277,13 @@ class APIBackend:
                     if (json["listener"] == None):
                         print("Canceling listener...")
                         try:
-                            self.listener.cancel()
+                            self.listener.stop()
                             self.listener = None
                         except AttributeError:
                             print("No listener to cancel! Ignoring...")
                     # As long as it's a number as expected, and we don't already have a listener running
                     elif (type(json["listener"]) is float or type(json["listener"]) is int):
-                        self.listener = setInterval.setInterval(self.returnAttributes, float(json["listener"]))
+                        self.listener = tornado.ioloop.PeriodicCallback(self.returnAttributes, float(json["listener"]))
                         print("Starting listener (WARNING: No connection, so listener will do nothing until drone reconnects)...")
                 drone.updateConnectionStatus()
 
@@ -421,7 +419,7 @@ class APIBackend:
             except:
                 print("Unknown error in call of returnAttributes function!")
                 #self.socket.close()
-                #self.listener.cancel()
+                #self.listener.stop()
         else:
             print("Not returning attributes...not connected to drone!")
 
