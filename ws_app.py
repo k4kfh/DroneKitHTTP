@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import tornado.web
 import tornado.websocket
 import tornado.httpserver
@@ -193,7 +194,8 @@ class APIBackend:
                                     print("No listener to cancel! Ignoring...")
                             # As long as it's a number as expected, and we don't already have a listener running
                             elif (type(json["listener"]) is float or type(json["listener"]) is int):
-                                self.listener = setInterval.setInterval(self.returnAttributes, float(json["listener"]))
+                                self.listener = tornado.ioloop.PeriodicCallback(self.returnAttributes, float(json["listener"]))
+                                self.listener.start()
                                 print("Starting listener...")
                         else:
                             reply_dict = self.fetchAttributes()
@@ -230,7 +232,7 @@ class APIBackend:
                             elif (value == "BRAKE"):
                                 self.vehicleWrapper.vehicle.mode = dronekit.VehicleMode("BRAKE")
                             else:
-                                self.sendError("set", "Client attempted to set unsupported or invalid flight mode! Ignored.")
+                                self.sendError("set", "Client attempted to set unsupported or invalid flight mode! Valid modes are LOITER, STABILIZE, ALT_HOLD, GUIDED, AUTO, RTL, and BRAKE.")
                         elif (rootKey == "location"):
                             # Only home is settable, but we use this For loop to catch any doofus trying to set a global location this way
                             for location_type,location_data in value.items():
@@ -385,7 +387,7 @@ class APIBackend:
         # More tricky variables that may or may not exist
         # Home location (may not be set yet)
         if (self.vehicleWrapper.vehicle.home_location):
-            print("Setting home location for attribute object...")
+            #print("Setting home location for attribute object...")
             attributes_dict["location"]["home"]["lat"] = self.vehicleWrapper.vehicle.home_location.lat
             attributes_dict["location"]["home"]["lon"] = self.vehicleWrapper.vehicle.home_location.lon
             attributes_dict["location"]["home"]["alt"] = self.vehicleWrapper.vehicle.home_location.alt
@@ -418,6 +420,7 @@ class APIBackend:
                 self.socket.write_message(reply_json)
             except:
                 print("Unknown error in call of returnAttributes function!")
+                raise
                 #self.socket.close()
                 #self.listener.stop()
         else:
