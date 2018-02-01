@@ -6,11 +6,12 @@ import json as json_lib
 import dronekit
 import sys
 import SetInterval as setInterval
+import hashlib
 
 all_clients = []
 validated_clients = []
 
-# Key/secret pairs with comments for labeling
+# Key/secret (effectively username/password) pairs with comments for labeling
 keys = {
 "sIegcsimlHCAc9PBXWRB":"2Aooe5DiLV5DXUPp9mMs"
 }
