@@ -12,4 +12,8 @@ This will send continuous updates about all the vehicle's attributes. 99% of the
         "type":"return",
         "fromListener":True,
         "attributes"://attributes object
-    }```
+}```
+
+**Set Editable Attribute**
+- Request: ``{"type":"set", "attributes":{"armed":true}}``
+- Reply: None (watch attributes object or whatever you set)

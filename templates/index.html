@@ -55,9 +55,14 @@
 
 
 
-    var Drone = function(ws_url, latency, APIkey, APIsecret){
+    var Drone = function(ws_url, latency, APIkey, APIsecret, messageHandler){
       latency = latency/1000; //latency in ms instead of sec
-
+      if (messageHandler == undefined){
+        this.messageHandler = function(e){}; //by default this does nothing
+      }
+      else {
+        this.messageHandler = messageHandler;
+      }
       this.socket = new WebSocket(ws_url)
       var mainDroneObject = this; //so we can access root object from within functions
       this.socket.onopen = function(e) {
@@ -86,7 +91,6 @@
         attributes : undefined,
       };
       this.logAllMessages = false;
-      this.messageHandler = function(e){}; //by default this does nothing
     }
 
     //Setting up our specific drone

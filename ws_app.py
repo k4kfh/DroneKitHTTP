@@ -201,6 +201,74 @@ class APIBackend:
                             reply_json = json_lib.dumps(reply_dict)
                             self.socket.write_message(reply_json)
                             # If the client just sends a get request with a blank list of attributes, assume they want ALL attributes
+                # Setting attributes (Sanity checking is CRITICAL here)
+                elif (json["type"] == "set"):
+                    requestedAttributes = json["attributes"]
+                    # Iterate over each item we want to set, one at a time
+                    for rootKey,value in requestedAttributes.items():
+                        # for safety's sake we don't make any attempts to streamline, we have an IF statement for each root key in the attributes object
+                        if (rootKey == "armed"):
+                            # Now we check all possible values
+                            if (type(value) is bool):
+                                self.vehicleWrapper.vehicle.armed = value
+                            else:
+                                self.sendError("set", "Type error while setting 'armed'.")
+                        elif (rootKey == "mode"):
+                            # Capitalize it just for good measure
+                            value = value.upper()
+                            if (value == "LOITER"):
+                                self.vehicleWrapper.vehicle.mode = dronekit.VehicleMode("LOITER")
+                            elif (value == "STABILIZE"):
+                                self.vehicleWrapper.vehicle.mode = dronekit.VehicleMode("STABILIZE")
+                            elif (value == "ALT_HOLD"):
+                                self.vehicleWrapper.vehicle.mode = dronekit.VehicleMode("ALT_HOLD")
+                            elif (value == "GUIDED"):
+                                self.vehicleWrapper.vehicle.mode = dronekit.VehicleMode("GUIDED")
+                            elif (value == "AUTO"):
+                                self.vehicleWrapper.vehicle.mode = dronekit.VehicleMode("AUTO")
+                            elif (value == "RTL"):
+                                self.vehicleWrapper.vehicle.mode = dronekit.VehicleMode("RTL")
+                            elif (value == "BRAKE"):
+                                self.vehicleWrapper.vehicle.mode = dronekit.VehicleMode("BRAKE")
+                            else:
+                                self.sendError("set", "Client attempted to set unsupported or invalid flight mode! Ignored.")
+                        elif (rootKey == "location"):
+                            # Only home is settable, but we use this For loop to catch any doofus trying to set a global location this way
+                            for location_type,location_data in value.items():
+                                if location_type == "home":
+                                    if "lat" in location_data and "lon" in location_data and "alt" in location_data:
+                                        print("You cool bro") # We good
+                                    else:
+                                        self.sendError("KeyError", "Location object is missing one or more mandatory components!") # Send error about location formatting
+                                else:
+                                    self.sendError("TypeError", "Cannot set such location objects! Only home is settable.") #Send error about not being able to set other location types
+                        elif (rootKey == "groundspeed"):
+                            if type(value) is float or type(value) is int or type(value) is long:
+                                # We're good
+                                self.vehicleWrapper.vehicle.groundspeed = float(value)
+                            else:
+                                # We're not good, the client sent something that's not a number
+                                self.sendError("TypeError", "Requested groundspeed value is not a valid float/int/long!")
+                        elif (rootKey == "airspeed"):
+                            if type(value) is float or type(value) is int or type(value) is long:
+                                # We're good
+                                self.vehicleWrapper.vehicle.airspeed = float(value)
+                            else:
+                                # We're not good, the client sent something that's not a number
+                                self.sendError("TypeError", "Requested airspeed value is not a valid float/int/long!")
+                        elif (rootKey == "parameters"):
+                            for param, setting in value.items():
+                                if type(setting) is float or type(setting) is int or type(setting) is long:
+                                    if str(param) in self.vehicleWrapper.vehicle.parameters.keys():
+                                        # Make sure we're dealing with a number
+                                        print("Attempting to set " + param + " to " + str(setting))
+                                        self.vehicleWrapper.vehicle.parameters[str(param)] = float(setting)
+                                    else:
+                                        self.sendError("KeyError", "You tried to set a parameter (" + str(param) + ") that is not available on this vehicle!")
+                                else:
+                                    self.sendError("TypeError", "The requested value for " + param + " was of the wrong type!")
+                        elif (rootKey == "channels"):
+                            print("ROOT KEY = channels")
                 elif (json["type"] == "close"):
                     self.socket.close()
             else:
@@ -310,8 +378,13 @@ class APIBackend:
             "airspeed":self.vehicleWrapper.vehicle.airspeed,
             "mode":self.vehicleWrapper.vehicle.mode.name,
             "armed":self.vehicleWrapper.vehicle.armed,
+            "channels":{
+                "overrides":self.vehicleWrapper.vehicle.channels.overrides,
+            },
+            "parameters":{}
         }
         # More tricky variables that may or may not exist
+        # Home location (may not be set yet)
         if (self.vehicleWrapper.vehicle.home_location):
             print("Setting home location for attribute object...")
             attributes_dict["location"]["home"]["lat"] = self.vehicleWrapper.vehicle.home_location.lat
@@ -320,7 +393,15 @@ class APIBackend:
         else:
             print("Autopilot has not set home location yet!")
 
-        print("Sending " + str(sys.getsizeof(attributes_dict)) + " byte attribute object...")
+        # Set channels (different vehicles may have different numbers of channels)
+        for channel, value in self.vehicleWrapper.vehicle.channels.items():
+            attributes_dict["channels"][channel] = int(value)
+
+        # Set all parameters (yeah, it's a lot)
+        for param, value in self.vehicleWrapper.vehicle.parameters.items():
+            attributes_dict["parameters"][param] = value
+        # Print size of attributes object (for network usage info)
+        #print("Sending " + str(sys.getsizeof(attributes_dict)) + " byte attribute object...")
         reply_dict = {
             "type":"return",
             "fromListener":False,
@@ -333,14 +414,26 @@ class APIBackend:
         if(drone.connected):
             reply_dict = self.fetchAttributes()
             reply_dict["fromListener"] = True
+            reply_json = json_lib.dumps(reply_dict)
             try:
-                self.socket.write_message(reply_dict)
+                self.socket.write_message(reply_json)
             except:
                 print("Unknown error in call of returnAttributes function!")
                 #self.socket.close()
                 #self.listener.cancel()
         else:
             print("Not returning attributes...not connected to drone!")
+
+    def sendError(self, errorType, errorMessage):
+        error_dict = {
+            "type":"error",
+            "error":{
+                "type":errorType,
+                "message":errorMessage
+            }
+        }
+        self.socket.write_message(json_lib.dumps(error_dict))
+        print("ERROR (" + errorType + "): " + errorMessage)
 
 if __name__ == '__main__':
     print("Starting server stuff...")
