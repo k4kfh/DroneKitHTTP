@@ -107,6 +107,9 @@ print("Attempting connection to drone...")
 drone = DroneKitWrapper("udpout:10.1.1.10:14560")
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
+    def check_origin(self, origin):
+        return True
+
     def open(self):
         all_clients.append(self)
         self.id = len(all_clients)
