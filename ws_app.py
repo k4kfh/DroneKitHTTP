@@ -269,7 +269,25 @@ class APIBackend:
                                 else:
                                     self.sendError("TypeError", "The requested value for " + param + " was of the wrong type!")
                         elif (rootKey == "channels"):
-                            print("ROOT KEY = channels")
+                            for key,val in value.items():
+                                if key == "overrides":
+                                    overridesToSet = value["overrides"]
+                                    invalid = False
+                                    for ch,override in overridesToSet.items():
+                                        # Make sure this is a channel the vehicle actually has
+                                        if (ch not in self.vehicleWrapper.vehicle.channels.keys()):
+                                            invalid = True
+                                    if (invalid == False):
+                                        try:
+                                            self.vehicleWrapper.vehicle.channels.overrides = overridesToSet
+                                        except TypeError:
+                                            self.sendError("TypeError", "You tried to set a channel override with the wrong type of variable!")
+                                    else:
+                                        self.sendError("KeyError", "You sent an invalid channel override!")
+                                else:
+                                    self.sendError("KeyError", "You are using improper syntax for setting channel overrides. You should only attempt to manipulate the overrides object.")
+
+
                 elif (json["type"] == "close"):
                     self.socket.close()
             else:
