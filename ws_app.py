@@ -6,14 +6,26 @@ import tornado.ioloop
 import json as json_lib
 import dronekit
 import sys
+import hashlib
+import bcrypt
 
 all_clients = []
 validated_clients = []
 
 # Key/secret (effectively username/password) pairs with comments for labeling
-keys = {
-"sIegcsimlHCAc9PBXWRB":"2Aooe5DiLV5DXUPp9mMs"
-}
+# Make sure the letters in the hash are lowercase
+validation_db = [
+    {
+        "hash":"840406da33f42e2bd7db99f0f8698fc91488ba2cd55150e5e51ebfb05096fb3c",
+        "randomSalt":None,
+        "saltedHash":None,
+    },
+    {
+        "hash":"7a2e73724bdee1a669aac218a06a6362f5b052ad3e8c5a040defc3efd4149542",
+        "randomSalt":None,
+        "saltedHash":None,
+    }
+]
 
 # Example Validate Message: {"type":"validate", "key":"sIegcsimlHCAc9PBXWRB", "secret":"2Aooe5DiLV5DXUPp9mMs"}
 
@@ -102,6 +114,21 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.api = APIBackend(drone, self) # temporarily pass only one connection to the API
         print("New client(#" + str(self.id) + ") joined from " + str(self.request.remote_ip))
 
+        # Make a local copy of the validation db
+        self.validation_db = validation_db
+        random_salt = bcrypt.gensalt() # Generate a salt
+        print("SALT: " + random_salt)
+        # Fill it in as a possible salt for all entries in our local copy of the validation db
+        for entry in self.validation_db:
+            entry["salt"] = random_salt
+            entry["saltedHash"] = hashlib.sha256(entry["hash"] + random_salt).hexdigest()
+        # Send initial hello message with random validation salt
+        hello_msg = {
+            "type":"hello",
+            "salt":random_salt
+        }
+        self.write_message(json_lib.dumps(hello_msg))
+
     def on_message(self, message):
         print("RX: " + str(message))
 
@@ -161,19 +188,28 @@ class APIBackend:
     def processJSON(self, json):
         if (not self.validated):
             if (json["type"] == "validate"):
-                # If a key/secret pair was even included in the message...
-                if ("key" in json and "secret" in json):
-                    # If we have a matching key/secret pair
-                    if (json["key"] in keys) and (keys[json["key"]] == json["secret"]):
-                        self.validated = True
-                        self.socket.write_message('{"type":"validate", "status":true}')
-                        # Add them to the list of validated clients
-                        validated_clients.append(self.socket)
-                        print("Client #" + str(self.socket.id) + " validated!")
+                # If a salted hash is included at all
+                if "token" in json:
+                    for entry in self.socket.validation_db:
+                        print("---")
+                        print("SALTED HASH FROM CLIENT: " + json["token"])
+                        print("SALTED HASH FROM LOCAL DB: " + entry["saltedHash"])
+                        # If the salted hash from the client matches one we have on record
+                        if entry["saltedHash"] == json["token"]:
+                            self.validated = True
+                            self.socket.write_message('{"type":"validate", "status":true}')
+                            # Add them to the list of validated clients
+                            validated_clients.append(self.socket)
+                            print("Client #" + str(self.socket.id) + " validated!")
+                            break
+                    else:
+                        self.socket.write_message('{"type":"validate", "status":false}')
+                        print("Client #" + str(self.socket.id) + " attempted validation, but failed due to invalid token!")
+
                 else:
                     self.validated = False
                     self.socket.write_message('{"type":"validate", "status":false}')
-                    print("Client #" + str(self.socket.id) + " attempted validation, but failed due to invalid or mismatched key/secret pair!")
+                    print("Client #" + str(self.socket.id) + " attempted validation, but failed due to invalid token!")
             else:
                 # Inform the client they are not validated
                 self.socket.write_message('{"type":"validate", "status":false}')

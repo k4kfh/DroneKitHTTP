@@ -1,7 +1,7 @@
 **Verify with Key/Secret Pair**
 You must do this to gain API access.
 
-- Request: ``{"type":"validate", "key":"sIegcsimlHCAc9PBXWRB", "secret":"2Aooe5DiLV5DXUPp9mMs"}``
+- Request: ``{"type":"validate", "token":"this is where the hash would go. It's sha256(sha256(password)+randomSaltFromHelloMsg)"}``
 - Reply: ``{"type":"validate", "status":true}``
 
 **Set Attribute Listener**
