@@ -161,6 +161,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             validated_clients.remove(self)
         except:
             pass
+        # Remove channel overrides
+        try:
+            self.api.vehicleWrapper.vehicle.channels.overrides = {}
+        except:
+            pass
 
 
 class IndexPageHandler(tornado.web.RequestHandler):
@@ -497,6 +502,10 @@ class APIBackend:
 if __name__ == '__main__':
     print("Starting server stuff...")
     ws_app = Application()
+    ssl_options={
+        "certfile":"/tmp/TornadoWS/certs/localhost_cert.crt",
+        "keyfile":"/tmp/TornadoWS/certs/localhost_cert.key",
+    }
     server = tornado.httpserver.HTTPServer(ws_app)
     server.listen(8080)
     tornado.ioloop.PeriodicCallback(drone.check, 1000).start()
