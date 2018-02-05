@@ -16,7 +16,7 @@ validated_clients = []
 # Make sure the letters in the hash are lowercase
 validation_db = [
     {
-        "hash":"840406da33f42e2bd7db99f0f8698fc91488ba2cd55150e5e51ebfb05096fb3c",
+        "hash":"ee58487da0319d98e8fb66a77bccc7895ef4f57785115817ad56476a7b908ce7",
         "randomSalt":None,
         "saltedHash":None,
     },
