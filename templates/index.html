@@ -124,7 +124,7 @@
     }
 
     //Setting up our specific drone
-    solo = new Drone("ws://" + window.location.host + "/websocket", 250, "SpeakOfThePompatusOfLove")
+    solo = new Drone("ws://" + window.location.host + "/websocket", 250, "BigHotelWithTheLightOn")
     solo.messageHandler = function(msg){
       json = JSON.parse(msg.data)
       if (json.type == "return"){

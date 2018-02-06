@@ -282,7 +282,7 @@ class APIBackend:
                             for location_type,location_data in value.items():
                                 if location_type == "home":
                                     if "lat" in location_data and "lon" in location_data and "alt" in location_data:
-                                        print("You cool bro") # We good
+                                        self.vehicleWrapper.vehicle.home_location = dronekit.LocationGlobal(location_data["lat"], location_data["lon"], location_data["alt"])
                                     else:
                                         self.sendError("KeyError", "Location object is missing one or more mandatory components!") # Send error about location formatting
                                 else:
