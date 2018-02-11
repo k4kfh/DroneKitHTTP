@@ -1,0 +1,58 @@
+<html>
+    <head>
+        <script src="jquery-3.3.1.min.js"></script>
+        <script src="materialize/js/materialize.min.js"></script>
+        <link rel="stylesheet" href="materialize/css/materialize.min.css">
+        <script src="sha256.js"></script>
+        <script src="dronekit.js"></script>
+    </head>
+    <body>
+        <h3 class="center">DroneKit.js Demo</h3>
+        <div class="row">
+            <div class="col s6">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Telemetry</span>
+                        <table>
+                            <tr>
+                                <td><b>Altitude (m)</b></td>
+                                <td id="altitude"></td>
+                            </tr>
+                            <tr>
+                                <td><b>Pitch</b></td>
+                                <td id="pitch"></td>
+                            </tr>
+                            <tr>
+                                <td><b>Roll</b></td>
+                                <td id="roll"></td>
+                            </tr>
+                            <tr>
+                                <td><b>Yaw</b></td>
+                                <td id="yaw"></td>
+                            </tr>
+                            <tr>
+                                <td><b>Airspeed</b></td>
+                                <td id="airspeed"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col s6">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Flight Modes</span>
+                        <b>Current Flight Mode: <a class="flight-mode-indicator">Unknown</a></b>
+                        <div class="row">
+                            <a class="btn">Loiter</a>
+                            <a class="btn">Alt. Hold</a>
+                            <a class="btn">Guided</a>
+                            <a class="btn">RTL</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </body>
+</html>
