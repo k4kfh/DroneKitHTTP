@@ -1,0 +1,131 @@
+<html>
+
+<head>
+    <script src="jquery-3.3.1.min.js"></script>
+    <script src="materialize/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="materialize/css/materialize.min.css">
+    <script src="sha256.js"></script>
+    <script src="dronekit.js"></script>
+    <script src="buddybox.js"></script>
+</head>
+
+<body>
+    <h3 class="center light">BuddyBox</h3>
+    <div class="container">
+        <div class="row">
+            <div class="col s6">
+                <div class="card">
+                    <div class='card-content'>
+                        <span class="card-title">Gamepad</span>
+                        <div id="gamepad_connection" class="chip red white-text">Disconnected</div>
+                        <div id="gamepad_override" class="chip">Override Inactive</div>
+                        <br>
+                        <br>
+                        <div class="row">
+                            <div class="col s3">
+                                <b>Roll</b>
+                            </div>
+                            <div class="col s9">
+                                <div class="progress">
+                                    <div id="gamepad_roll" class="determinate" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s3">
+                                <b>Pitch</b>
+                            </div>
+                            <div class="col s9">
+                                <div class="progress">
+                                    <div id="gamepad_pitch" class="determinate" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s3">
+                                <b>Throttle</b>
+                            </div>
+                            <div class="col s9">
+                                <div class="progress">
+                                    <div class="determinate" id="gamepad_throttle" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s3">
+                                <b>Yaw</b>
+                            </div>
+                            <div class="col s9">
+                                <div class="progress">
+                                    <div class="determinate" id="gamepad_yaw" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            
+            <div class="col s6">
+                <div class="card">
+                    <div class='card-content'>
+                        <span class="card-title">ArduPilot</span>
+                        <div id="ardupilot_connection" class="chip red white-text">Disconnected</div>
+                        <div id="ardupilot_mode" class="chip">LOITER</div>
+                        <br>
+                        <br>
+                        <div class="row">
+                            <div class="col s3">
+                                <b>Roll</b>
+                            </div>
+                            <div class="col s9">
+                                <div class="progress">
+                                    <div class="determinate" id="ardupilot_roll" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s3">
+                                <b>Pitch</b>
+                            </div>
+                            <div class="col s9">
+                                <div class="progress">
+                                    <div class="determinate" id="ardupilot_pitch" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s3">
+                                <b>Throttle</b>
+                            </div>
+                            <div class="col s9">
+                                <div class="progress">
+                                    <div class="determinate" id="ardupilot_throttle" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s3">
+                                <b>Yaw</b>
+                            </div>
+                            <div class="col s9">
+                                <div class="progress">
+                                    <div class="determinate" id="ardupilot_yaw" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s12">
+                <a id="disable_overrides_btn" class="btn-large grey waves-effect z-depth-0" style="width:100%">RELINQUISH CONTROL (DISABLE OVERRIDES)</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
