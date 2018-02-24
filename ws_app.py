@@ -348,6 +348,7 @@ class APIBackend:
                     # As long as it's a number as expected, and we don't already have a listener running
                     elif (type(json["listener"]) is float or type(json["listener"]) is int):
                         self.listener = tornado.ioloop.PeriodicCallback(self.returnAttributes, float(json["listener"]))
+                        self.listener.start()
                         print("Starting listener (WARNING: No connection, so listener will do nothing until drone reconnects)...")
                 drone.updateConnectionStatus()
 
