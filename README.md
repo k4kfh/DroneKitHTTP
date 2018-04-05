@@ -3,6 +3,12 @@ WebSockets API for ArduCopter and other MAVLink vehicles compatible with 3DR Dro
 
 This project is still very much a work in progress, but it aims to be a simple way to manipulate an ArduCopter drone (in my case a 3DR Solo) from a simple client-side JavaScript app.
 
+#### Install
+```sh
+pip2 install -r requirements.txt
+```
+
+
 ### Why would you want this?
 
 My use case is fairly broad, but I want to be able to make small web apps that I can host on a web server on the drone's controller (a Linux machine) that will allow any smartphone or tablet to control attributes of the drone.
